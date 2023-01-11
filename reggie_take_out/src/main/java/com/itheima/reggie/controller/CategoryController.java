@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.print.DocFlavor;
+import java.util.List;
 
 /**
  * 作者：Nega Nebulus
@@ -73,12 +74,28 @@ public class CategoryController {
         return R.success("菜品删除成功");
    }
 
-@PutMapping
+    /**
+     * 修改菜品分类
+     * @param category
+     * @return
+     */
+    @PutMapping
    public R<String> update(@RequestBody Category category){
         log.info("修改分类category{}",category);
         categoryService.updateById(category);
         return R.success("修改成功");
    }
-
+    @GetMapping("/list")
+   public R<List<Category>> list(Category category){
+        //创建构造器
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        //设置条件
+        queryWrapper.eq(category.getType() != 0,Category::getType,category.getType());
+        //设置排序 根据sort升序排列，根据更新时间降序排列
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        //调用MP的list方法
+        List<Category> list = categoryService.list(queryWrapper);
+        return R.success(list);
+   }
 
 }
